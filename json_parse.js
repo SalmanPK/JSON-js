@@ -68,6 +68,7 @@ var json_parse = (function () {
     var ch;     // The current character
     var escapee = {
         "\"": "\"",
+        "'": "'",
         "\\": "\\",
         "/": "/",
         b: "\b",
@@ -155,12 +156,13 @@ var json_parse = (function () {
         var i;
         var value = "";
         var uffff;
+        var literal = (ch === '"') ? ch : (ch === "'" ) ? ch : null;
 
 // When parsing for string values, we must look for " and \ characters.
 
-        if (ch === "\"") {
+        if (ch === literal) {
             while (next()) {
-                if (ch === "\"") {
+                if (ch === literal) {
                     next();
                     return value;
                 }
@@ -314,7 +316,7 @@ var json_parse = (function () {
 // Return the json_parse function. It will have access to all of the above
 // functions and variables.
 
-    return function (source, reviver) {
+    return function (source) {
         var result;
 
         text = source;
@@ -325,32 +327,7 @@ var json_parse = (function () {
         if (ch) {
             error("Syntax error");
         }
-
-// If there is a reviver function, we recursively walk the new structure,
-// passing each name/value pair to the reviver function for possible
-// transformation, starting with a temporary root object that holds the result
-// in an empty key. If there is not a reviver function, we simply return the
-// result.
-
-        return (typeof reviver === "function")
-            ? (function walk(holder, key) {
-                var k;
-                var v;
-                var val = holder[key];
-                if (val && typeof val === "object") {
-                    for (k in val) {
-                        if (Object.prototype.hasOwnProperty.call(val, k)) {
-                            v = walk(val, k);
-                            if (v !== undefined) {
-                                val[k] = v;
-                            } else {
-                                delete val[k];
-                            }
-                        }
-                    }
-                }
-                return reviver.call(holder, key, val);
-            }({"": result}, ""))
-            : result;
+		
+        return result
     };
 }());
