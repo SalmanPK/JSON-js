@@ -1,3 +1,5 @@
+*This fork allows single quotes as string literals with the `json_parse` function.*
+
 JSON in JavaScript
 
 
